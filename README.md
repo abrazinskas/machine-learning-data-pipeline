@@ -102,7 +102,7 @@ An example data-chunk for machine translation is shown below.
 
 <img src='img/interm_format.png' width='70%'/>
 
-The shaded rectangles correspond to numpy arrays of different types but with the same first dimensionality. Note that numpy arrays can contain arbitrary types besides standard floats and ints.
+The shaded rectangles correspond to numpy arrays of different types but with the same first dimension (i.e the same length). Note that numpy arrays can contain arbitrary types besides standard floats and ints.
 
 ## License ##
 

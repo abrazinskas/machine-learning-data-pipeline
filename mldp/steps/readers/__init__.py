@@ -1,3 +1,2 @@
 from base_reader import BaseReader
-from base_multi_threaded_reader import BaseMultiThreadedReader
 from csv_reader import CsvReader
