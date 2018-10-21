@@ -1,0 +1,4 @@
+.idea/
+*.pyc
+/smoke_tests
+.DS_Store
