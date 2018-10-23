@@ -253,7 +253,7 @@ class Pipeline(OrderedAttrs):
         chain = []
         if self.preprocessor:
             chain.append(self.preprocessor)
-        chain += self.steps
+        chain += [self.reader] + self.steps
 
         children_titles = []
         children_dicts = []

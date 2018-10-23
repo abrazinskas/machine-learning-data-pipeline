@@ -1,14 +1,14 @@
 # Machine Learning Data Pipeline (MLDP) #
 
 This repository contains a module for **parallel**, **real-time data processing** for machine learning purposes.
-Essentially, it provides an infrastructure for efficient parallel data processing for models **development (training, testing)**, and **production**. A data pipeline can be understood as a sequence of computation steps that are applied to data-chunks that are read progressively (opposed to reading all data to the main memory at once), as shown below. The final output of the data pipeline are data-chunks (batches) in a desired format, which will depend on a model at hand.
+Essentially, it provides an infrastructure for efficient parallel data processing for models **development (training, testing)**, and **production**. A data pipeline can be understood as a sequence of computational steps that are applied to data-chunks that are read progressively (opposed to reading all data to the main memory at once), as shown below. The final output of the data pipeline are data-chunks (batches) in a desired format, which will depend on a model at hand.
 
 <img src="img/mldp.png"/>
 
 As opposed to a common meaning of data pipeline, the module focuses on providing data-chunks in real-time, as fast as possible, assuming that a data processing procedure might change over the course of experiments series.
 
-Because similar computation steps can in principle be applied to different ML projects, the main problem is that it's not straightforward to apply them to data in different format.
-Fortunately, the pipeline passes a light-weight intermediate data format across steps. Therefore, **computation steps can be reused** as their input will always be of the same format regardless of whether your data is in csv, xml, or some other format.
+Because similar computational steps can in principle be applied to different ML projects, the main problem is that it's not straightforward to apply them to data in different format.
+Fortunately, the pipeline passes a light-weight intermediate data format across steps. Therefore, **computational steps can be reused** as their input will always be of the same format regardless of whether your data is in csv, xml, or some other format.
 
 Finally, a need for experiments reproducibility is considered by **documentation generation**. Such that it would be possible to rerun an older experiment and obtain the same results, or simply lookup what setup has been used in a previous model run. To facilitate that, the module allows documentation generation of pipeline setups and individual components that were used to process data.
 
@@ -16,20 +16,20 @@ Finally, a need for experiments reproducibility is considered by **documentation
 
 * Highly scalable data processing on multi-core CPU architectures.
 * Automatic documentation generation of data pipelines and individual steps.
-* Code reusability of computation steps (agnostic to an input data format).
+* Code reusability of computational steps (agnostic to an input data format).
 * Ease of custom steps integration to the module.
 * Complete independence of other machine learning libraries, such as TensorFlow.
 * A set of implemented steps that can be used out-of-the-box for data processing, such as a csv reader, vocabulary mapper, padder, and token processor.
 
-The module does not provide an exhaustive set of computation steps, and a user has a complete freedom to write own steps in a pure Python, and use any extra libraries that he might wish.
+The module does not provide an exhaustive set of computational steps, and a user has a complete freedom to write own steps in a pure Python, and use any extra libraries that he might wish.
 
 ## Installation ##
 
-```python
-pip install machine-learning-data-pipeline
-```
+<!--```python-->
+<!--pip install machine-learning-data-pipeline-->
+<!--```-->
 
-Alternatively, clone the repository, and from its root directory run:
+Clone the repository, and from its root directory run:
 ```python
 pip install .
 ```

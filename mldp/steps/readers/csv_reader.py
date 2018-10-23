@@ -27,8 +27,8 @@ class CsvReader(BaseReader):
     incomplete data-chunk will be produced.
     """
 
-    def __init__(self, chunk_size=1000, worker_threads_num=1,
-                 buffer_size=5, name_prefix=None, engine='c', **kwargs):
+    def __init__(self, chunk_size=1000, worker_threads_num=1, buffer_size=5,
+                 name_prefix=None, engine='python', **parser_kwargs):
         """
         :param chunk_size: the intermediate number of data units that are
                            passed along the pipeline. Larger data-chunks consume
@@ -45,7 +45,7 @@ class CsvReader(BaseReader):
                             if the queue is full. They resume when the queue
                             gets free slots.
         :param engine: whether to use 'c' or 'python' modified pandas csv reader.
-        :param kwargs: additional parameters that should be passed to the pandas
+        :param parser_kwargs: additional parameters that should be passed to the pandas
                        reader (see pandas.read_csv).
         """
         super(CsvReader, self).__init__(chunk_size=chunk_size,
@@ -61,7 +61,8 @@ class CsvReader(BaseReader):
             buffer_size = None
 
         self.worker_threads_num = worker_threads_num
-        self.parser_kwargs = kwargs
+        self.parser_kwargs = parser_kwargs
+        self.parser_kwargs['engine'] = engine
         self.buffer_size = buffer_size
 
     def _iter(self, data_path):
@@ -106,11 +107,8 @@ class CsvReader(BaseReader):
         # the queue will accumulate raw data-chunks produced by threads
         chunk_queue = Queue(maxsize=self.buffer_size)
         # function's partial that only will expect a file opener used by workers
-        func = fun_partial(self.get_data_chunk_iter,
-                           chunk_size=self.chunk_size,
-                           iterable=True,
-                           queue=chunk_queue,
-                           parser_kwargs=self.parser_kwargs)
+        func = fun_partial(self.get_data_chunk_iter, chunksize=self.chunk_size,
+                           **self.parser_kwargs)
 
         # creating a pool of threads, and assigning jobs to them
         pool = Pool(self.worker_threads_num)
@@ -132,23 +130,26 @@ class CsvReader(BaseReader):
             else:
                 yield chunk
 
-    def _create_single_th_iter(self, file_openers, **parser_kwargs):
+    def _create_single_th_iter(self, file_openers):
         """Single threaded generator that avoid using Pools and Queues."""
         for file_opener in file_openers:
             dc_iter = self.get_data_chunk_iter(file_opener,
-                                               chunk_size=self.chunk_size,
-                                               **parser_kwargs)
+                                               chunksize=self.chunk_size,
+                                               **self.parser_kwargs)
             for chunk in dc_iter:
                 yield chunk
 
     @staticmethod
-    def get_data_chunk_iter(file_opener, chunk_size, **parser_kwargs):
+    def get_data_chunk_iter(file_opener, **parser_kwargs):
         """
         Create and return a modified pandas data generator that spits out
         dictionaries of numpy arrays, instead of data-frames.
         """
-        pandas_iter = TextFileReaderMod(file_opener(),
-                                        chunksize=chunk_size,
-                                        iterable=True,
-                                        **parser_kwargs)
+        f = file_opener()
+        try:
+            pandas_iter = TextFileReaderMod(f,
+                                            iterable=True,
+                                            **parser_kwargs)
+        except Exception as e:
+            raise e
         return pandas_iter
