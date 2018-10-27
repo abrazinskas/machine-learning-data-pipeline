@@ -9,7 +9,7 @@ class PandasFormatter(BaseFormatter):
 
     def _format(self, data_chunk):
         """
-        :param data_chunk: dict of np.ndarray(s)
+        :param data_chunk: dict of np.ndarrays
         :return: Pandas DataFrame.
         """
         return pandas.DataFrame(data_chunk)

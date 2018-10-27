@@ -1,5 +1,6 @@
 from numpy import isclose
 import numpy as np
+from collections import OrderedDict
 
 
 def equal_data_chunks(data_chunk1, data_chunk2):
@@ -40,5 +41,15 @@ def equal_vals(val1, val2):
 
 
 def get_chunk_len(data_chunk):
-    """Returns the length of the data_chunk assuming it's a valid one """
+    """Returns the length of the data_chunk assuming it's a valid one."""
     return len(data_chunk[data_chunk.keys()[0]])
+
+
+def iter_over_elems(data_chunk):
+    """A helper function to iterate over elements of data-chunks."""
+    keys = data_chunk.keys()
+    for i in range(get_chunk_len(data_chunk)):
+        el = OrderedDict()
+        for k in keys:
+            el[k] = data_chunk[k][i]
+        yield el

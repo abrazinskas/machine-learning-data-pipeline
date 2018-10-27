@@ -4,6 +4,7 @@ from mldp.utils.util_classes import fs_accessor_factory
 from mldp.utils.util_funcs.paths_and_files import is_s3_path,\
     filter_file_paths_by_extension
 from functools import partial as fun_partial
+from collections import OrderedDict
 
 
 class TextFileReaderMod(TextFileReader):
@@ -12,17 +13,30 @@ class TextFileReaderMod(TextFileReader):
     read data into Pandas DataFrames but instead leaves data in the dictionary
     of the numpy arrays format.
     """
+    def __init__(self, f, engine=None, od=False, **kwargs):
+        """
+        :param od: whether to return ordered dictionaries for data-chunks.
+        """
+        super(TextFileReaderMod, self).__init__(f, engine, **kwargs)
+        self.od = od
+
     def read(self, nrows=None):
+        """
+        :return: ordered dict of numpy arrays.
+        """
         if nrows is not None:
             if self.options.get('skipfooter'):
                 raise ValueError('skipfooter not supported for iteration')
         fields_and_fields_to_data_tuple = self._engine.read(nrows)
-        if self.options.get('as_recarray'):
-            return fields_and_fields_to_data_tuple
-        # May alter columns / col_dict
-        index, columns, col_dict = \
-            self._create_index(fields_and_fields_to_data_tuple)
-        return col_dict
+        index, columns, col_dict = fields_and_fields_to_data_tuple
+
+        if self.od:
+            data_chunk = OrderedDict()
+            for cn in columns:
+                data_chunk[cn] = col_dict[cn]
+            return data_chunk
+        else:
+            return col_dict
 
 
 def populate_queue_with_chunks(itr_creator, queue):

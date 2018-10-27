@@ -10,6 +10,9 @@ class BasePreProcessor(BaseStep):
     will be fed to the reader, so input-output must be coherent.
     """
 
+    def __init__(self, **kwargs):
+        super(BasePreProcessor, self).__init__(**kwargs)
+
     def __call__(self, **kwargs):
         """
         This is the main method that suppose to execute the actual pre-processing

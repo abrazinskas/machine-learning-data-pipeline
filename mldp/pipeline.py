@@ -1,7 +1,7 @@
 from multiprocessing import Process, Queue
 from steps.readers.base_reader import BaseReader
 from steps.base_step import BaseStep
-from steps.preprocessing.base_preprocessor import BasePreProcessor
+from steps.preprocessors import BasePreProcessor
 from steps.formatters.base_formatter import BaseFormatter
 from steps.general.chunk_size_adjuster import ChunkSizeAdjuster
 from utils.constants import TERMINATION_TOKEN

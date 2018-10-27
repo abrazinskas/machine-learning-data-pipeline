@@ -1,4 +1,4 @@
-from mldp.steps.preprocessing.base_preprocessor import BasePreProcessor
+from mldp.steps.preprocessors import BasePreProcessor
 from mldp.utils.util_funcs.general import listify
 from mldp.utils.util_funcs.paths_and_files import get_file_paths, safe_mkdir
 from mldp.utils.util_funcs.validation import validate_data_paths

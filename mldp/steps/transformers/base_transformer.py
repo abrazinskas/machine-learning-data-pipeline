@@ -18,8 +18,8 @@ class BaseTransformer(BaseStep):
 
     def __call__(self, data_chunk):
         """
-        :type data_chunk: dict of np.ndarray(s)
-        :rtype data_chunk: dict of np.ndarray(s)
+        :type data_chunk: dict of np.ndarrays.
+        :rtype data_chunk: dict of np.ndarrays.
         """
         try:
             validate_data_chunk(data_chunk, error_mess_prefix='input')
@@ -36,7 +36,7 @@ class BaseTransformer(BaseStep):
 
     def _transform(self, data_chunk):
         """
-        :type data_chunk: dict of np.ndarray(s)
-        :return: transformed data-chunk (same format) with modified values
+        :type data_chunk: dict of np.ndarrays.
+        :return: transformed data-chunk (same format) with modified values.
         """
         raise NotImplementedError
