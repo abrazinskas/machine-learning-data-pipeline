@@ -111,7 +111,6 @@ class CsvReader(BaseReader):
         parser_kwargs = self.adjust_kwargs_to_engine(self.parser_kwargs)
         iter_creator = fun_partial(self.get_data_chunk_iter,
                                    chunksize=self.chunk_size, **parser_kwargs)
-
         queue_populator = fun_partial(populate_queue_with_chunks,
                                       itr_creator=iter_creator,
                                       queue=chunk_queue)
@@ -119,13 +118,13 @@ class CsvReader(BaseReader):
         # creating a pool of threads, and assigning jobs to them
         pool = Pool(self.worker_threads_num)
         pool.map_async(queue_populator, file_openers)
-        pool.close()  # indicate that never going to submit more work
+        pool.close()  # indicating that never going to submit more work
 
         # the inf. while loop is broken when all files are read,
         # i.e. a termination token is received for each file
         received_termin_tokens_count = 0
         while True:
-            chunk = chunk_queue.get(timeout=35)
+            chunk = chunk_queue.get(timeout=5)
             if isinstance(chunk, Exception):
                 raise chunk
             if chunk == TERMINATION_TOKEN:
