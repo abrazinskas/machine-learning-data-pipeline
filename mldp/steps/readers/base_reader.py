@@ -27,10 +27,10 @@ class BaseReader(BaseStep):
         :return: generator over data-chunks.
         """
         for data_chunk in self._iter(**kwargs):
-            # try:
-            #     validate_data_chunk(data_chunk)
-            # except Exception as e:
-            #     raise e
+            try:
+                data_chunk.validate()
+            except Exception as e:
+                raise e
             yield data_chunk
 
     def _iter(self, **kwargs):

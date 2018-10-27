@@ -15,11 +15,11 @@ class BaseFormatter(BaseStep):
         :return: depends on the children class's _format(), without any
                  format restrictions.
         """
-        # try:
-        #     validate_data_chunk(data_chunk, error_mess_prefix="input")
-        # except StandardError as e:
-        #     raise e
-        #
+        try:
+            data_chunk.validate()
+        except StandardError as e:
+            raise e
+
         return self._format(data_chunk)
 
     def _format(self, data_chunk):

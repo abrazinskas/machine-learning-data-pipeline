@@ -32,6 +32,17 @@ class TestDataChunks(unittest.TestCase):
             with self.assertRaises(TypeError):
                 chunk.validate()
 
+    def test_chunks_with_different_value_array_sizes(self):
+        chunk_size = 100
+        attrs_numbers = [2, 3, 10, 25, 9]
+
+        for attrs_number in attrs_numbers:
+            chunk = generate_data_chunk(attrs_number, chunk_size)
+            attr_to_alter = np.random.choice(chunk.keys(), 1)[0]
+            chunk[attr_to_alter] = chunk[attr_to_alter][:-1]
+            with self.assertRaises(ValueError):
+                chunk.validate()
+
 
 if __name__ == '__main__':
     unittest.main()

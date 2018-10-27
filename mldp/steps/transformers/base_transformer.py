@@ -22,14 +22,14 @@ class BaseTransformer(BaseStep):
         :rtype data_chunk: dict of np.ndarrays.
         """
         try:
-            validate_data_chunk(data_chunk, error_mess_prefix='input')
+            data_chunk.validate()
         except StandardError as e:
             raise e
         if get_chunk_len(data_chunk) == 0:
             return data_chunk
         data_chunk = self._transform(data_chunk)
         try:
-            validate_data_chunk(data_chunk, error_mess_prefix='output')
+            data_chunk.validate()
         except StandardError as e:
             raise e
         return data_chunk

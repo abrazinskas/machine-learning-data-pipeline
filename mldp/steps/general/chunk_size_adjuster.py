@@ -29,10 +29,10 @@ class ChunkSizeAdjuster(BaseStep):
         with the adjusted size.
         """
         for data_chunk in data_chunk_iter:
-            # try:
-            #     validate_data_chunk(data_chunk, error_mess_prefix="input")
-            # except Exception as e:
-            #     raise e
+            try:
+                data_chunk.validate()
+            except Exception as e:
+                raise e
 
             for adjusted_dc in self._collector.absorb_yield_if_full(data_chunk):
                 yield adjusted_dc
