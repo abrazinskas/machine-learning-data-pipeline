@@ -1,5 +1,3 @@
-from mldp.utils.util_funcs.validation import validate_data_chunk
-from mldp.utils.util_funcs.data_chunks import get_chunk_len
 from mldp.steps.base_step import BaseStep
 
 
@@ -25,8 +23,9 @@ class BaseTransformer(BaseStep):
             data_chunk.validate()
         except StandardError as e:
             raise e
-        if get_chunk_len(data_chunk) == 0:
+        if len(data_chunk) == 0:
             return data_chunk
+
         data_chunk = self._transform(data_chunk)
         try:
             data_chunk.validate()

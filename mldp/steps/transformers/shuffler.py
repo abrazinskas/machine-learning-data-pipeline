@@ -1,5 +1,4 @@
 from mldp.steps.transformers.base_transformer import BaseTransformer
-from mldp.utils.util_funcs.data_chunks import get_chunk_len
 from numpy.random import permutation, seed as seed_func
 
 
@@ -25,8 +24,7 @@ class Shuffler(BaseTransformer):
         :param data_chunk: dict of np.ndarrays
         :return: data-chunk with shuffled values
         """
-        chunk_len = get_chunk_len(data_chunk)
-        shuffled_order = permutation(range(chunk_len))
-        for key in data_chunk:
+        shuffled_order = permutation(range(len(data_chunk)))
+        for key in data_chunk.keys():
             data_chunk[key] = data_chunk[key][shuffled_order]
         return data_chunk

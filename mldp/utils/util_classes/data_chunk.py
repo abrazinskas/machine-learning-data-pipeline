@@ -72,7 +72,7 @@ class DataChunk(object):
 
     def __iter__(self):
         """Creates a generator over data-units (dict or ordered dict)."""
-        if self.is_valid():
+        if not self.is_valid():
             raise ValueError("Can't iterate over an invalid data-chunk.")
         for i in range(len(self)):
             data_unit = OrderedDict() if isinstance(self._data, OrderedDict) \

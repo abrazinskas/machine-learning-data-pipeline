@@ -3,8 +3,7 @@ from mldp.steps.transformers import FunctionApplier, Shuffler, VocabMapper,\
     Padder, WindowSlider, TokenProcessor
 from mldp.steps.transformers.common import create_new_field_name
 from mldp.steps.readers import CsvReader
-from mldp.utils.util_funcs.data_chunks import equal_data_chunks
-from mldp.utils.util_classes import Vocabulary
+from mldp.utils.util_classes import Vocabulary, DataChunk
 from common import generate_data_chunk, create_list_of_data_chunks,\
     read_data_from_csv_file
 from mock import patch
@@ -41,7 +40,7 @@ class TestTransformers(unittest.TestCase):
                     expected_chunk[transform_attr] = \
                         func(expected_chunk[transform_attr])
 
-                self.assertTrue(equal_data_chunks(actual_chunk, expected_chunk))
+                self.assertTrue(actual_chunk == expected_chunk)
 
     def test_input_data_chunk_format_validation(self):
         """
@@ -92,7 +91,7 @@ class TestTransformers(unittest.TestCase):
             # and all data-units are preserved for the shuffled fields
             shuffled_data_chunk = shuffler(data_chunk)
 
-            for attr in shuffled_data_chunk:
+            for attr in shuffled_data_chunk.keys():
                 res = isclose(original_data_chunk[attr],
                               shuffled_data_chunk[attr])
                 self.assertFalse(res.all())
@@ -131,14 +130,14 @@ class TestTransformers(unittest.TestCase):
         target_field_name = "dummy"
         symbols_attr = "id"
 
-        data_chunk = {target_field_name: np.array([
+        data_chunk = DataChunk({target_field_name: np.array([
             [["one"], ["two"]],
             [["three"], ["four", "five", "six"]]
-        ], dtype="object")}
+        ], dtype="object")})
         exp_val = np.empty(2, dtype="object")
         exp_val[0] = np.array([[1], [2]])
         exp_val[1] = np.array([[3], [4, 5, 6]])
-        expected_output_chunk = {target_field_name: exp_val}
+        expected_output_chunk = DataChunk({target_field_name: exp_val})
 
         # creating and populating a vocab
         vocab = Vocabulary()
@@ -154,22 +153,21 @@ class TestTransformers(unittest.TestCase):
                              symbols_attr=symbols_attr)
         actual_output_chunk = mapper(copy.deepcopy(data_chunk))
 
-        self.assertTrue(equal_data_chunks(actual_output_chunk,
-                                          expected_output_chunk))
+        self.assertTrue(actual_output_chunk == expected_output_chunk)
 
     def test_vocabulary_mapper_mixed_field_values(self):
         """Testing whether the mapper can map multi-dim mixed field values."""
         target_field_name = "dummy"
         symbols_attr = "id"
 
-        data_chunk = {target_field_name: np.array([
+        data_chunk = DataChunk({target_field_name: np.array([
             [["one"], np.array(["two", "one"])],
             [["three"], np.array(["four", "five", "six"])]
-        ], dtype="object")}
-        expected_output_chunk = {target_field_name: np.array([
+        ], dtype="object")})
+        expected_output_chunk = DataChunk({target_field_name: np.array([
             [[1], np.array([2, 1])],
             [[3], np.array([4, 5, 6])]
-        ], dtype="object")}
+        ], dtype="object")})
 
         # creating and populating a vocab
         vocab = Vocabulary()
@@ -185,8 +183,7 @@ class TestTransformers(unittest.TestCase):
                              symbols_attr=symbols_attr)
         actual_output_chunk = mapper(data_chunk)
 
-        self.assertTrue(equal_data_chunks(actual_output_chunk,
-                                          expected_output_chunk))
+        self.assertTrue(actual_output_chunk == expected_output_chunk)
 
     def test_2D_padder(self):
         """
@@ -239,11 +236,11 @@ class TestTransformers(unittest.TestCase):
         padding_mode = "both"
         axis = 2
 
-        data_chunk = {field_name: np.array([
+        data_chunk = DataChunk({field_name: np.array([
             [[0, 1, 2], [3, 4, 5], [], [6]],
             [[1], [1, 2], []],
             []
-        ])}
+        ])})
         padder = Padder(field_name, pad_symbol=pad_symbol, axis=axis,
                         new_mask_field_name_suffix=mask_fn_suffix,
                         padding_mode=padding_mode)
@@ -287,12 +284,13 @@ class TestTransformers(unittest.TestCase):
         step_size = 1
         only_full_windows = False
         input_seqs = np.array([list(range(6)), list(range(2))])
-        input_chunk = {field_name: input_seqs}
+        input_chunk = DataChunk({field_name: input_seqs})
         expect_seqs = np.array([
             [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5]],
             [[0, 1]]])
-        expected_output = {field_name: input_seqs, new_field_name: expect_seqs}
-        self._test_window_setup(input_chunk, expected_output,
+        expected_output_chunk = DataChunk({field_name: input_seqs,
+                                           new_field_name: expect_seqs})
+        self._test_window_setup(input_chunk, expected_output_chunk,
                                 field_name=field_name, suffix=suffix,
                                 window_size=window_size, step_size=step_size,
                                 only_full_windows=only_full_windows)
@@ -302,12 +300,13 @@ class TestTransformers(unittest.TestCase):
         step_size = 3
         only_full_windows = False
         input_seqs = np.array([list(range(7)), list(range(2))])
-        input_chunk = {field_name: input_seqs}
+        input_chunk = DataChunk({field_name: input_seqs})
         expect_seqs = np.array([
             [[0, 1, 2], [3, 4, 5], [6]],
             [[0, 1]]])
-        expected_output = {field_name: input_seqs, new_field_name: expect_seqs}
-        self._test_window_setup(input_chunk, expected_output,
+        expected_output_chunk = DataChunk({field_name: input_seqs,
+                                           new_field_name: expect_seqs})
+        self._test_window_setup(input_chunk, expected_output_chunk,
                                 field_name=field_name, suffix=suffix,
                                 window_size=window_size, step_size=step_size,
                                 only_full_windows=only_full_windows)
@@ -317,13 +316,14 @@ class TestTransformers(unittest.TestCase):
         step_size = 10
         only_full_windows = False
         input_seqs = np.array([list(range(3)), list(range(2))])
-        input_chunk = {field_name: input_seqs}
+        input_chunk = DataChunk({field_name: input_seqs})
         expect_seqs = np.empty(2, dtype="object")
         expect_seqs[0] = [[0, 1, 2]]
         expect_seqs[1] = [[0, 1]]
-        expected_output = {field_name: input_seqs, new_field_name: expect_seqs}
+        expected_output_chunk = DataChunk({field_name: input_seqs,
+                                           new_field_name: expect_seqs})
 
-        self._test_window_setup(input_chunk, expected_output,
+        self._test_window_setup(input_chunk, expected_output_chunk,
                                 field_name=field_name, suffix=suffix,
                                 window_size=window_size, step_size=step_size,
                                 only_full_windows=only_full_windows)
@@ -333,15 +333,16 @@ class TestTransformers(unittest.TestCase):
         step_size = 1
         only_full_windows = True
         input_seqs = np.array([list(range(6)), list(range(3)), list(range(1))])
-        input_chunk = {field_name: input_seqs}
+        input_chunk = DataChunk({field_name: input_seqs})
         expect_seqs = np.array([
             [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5]],
             [[0, 1], [1, 2]],
             []
         ])
-        expected_output = {field_name: input_seqs, new_field_name: expect_seqs}
+        expected_output_chunk = DataChunk({field_name: input_seqs,
+                                           new_field_name: expect_seqs})
 
-        self._test_window_setup(input_chunk, expected_output,
+        self._test_window_setup(input_chunk, expected_output_chunk,
                                 field_name=field_name, suffix=suffix,
                                 window_size=window_size, step_size=step_size,
                                 only_full_windows=only_full_windows)
@@ -357,8 +358,7 @@ class TestTransformers(unittest.TestCase):
                                      only_full_windows=only_full_windows)
         actual_output_chunk = window_slider(input_chunk)
 
-        self.assertTrue(equal_data_chunks(expected_output_chunk,
-                                          actual_output_chunk))
+        self.assertTrue(expected_output_chunk == actual_output_chunk)
 
     def test_tokenizer(self):
         """"""
@@ -373,19 +373,18 @@ class TestTransformers(unittest.TestCase):
         input_seqs = np.array(["Hello, this is my dog!",
                                "A dummy sentence for tokenization.",
                                "What a lovely puppy!"])
-        input_data_chunk = {field_name: input_seqs}
+        input_data_chunk = DataChunk({field_name: input_seqs})
         expect_seqs = np.array([["hello", "this", "is", "my", special_token],
                                 ["a", "dummy", "sentence", "for", "tokenization"],
                                 ["what", "a", "lovely", special_token]])
-        expected_data_chunk = {field_name: expect_seqs}
+        expected_data_chunk = DataChunk({field_name: expect_seqs})
 
         tokenizer = TokenProcessor(field_name, tokenization_func=tokenization_func,
                                    token_cleaning_func=token_cleaning_func,
                                    token_matching_func=token_matching_func,
                                    lower_case=lower_case)
         actual_data_chunk = tokenizer(input_data_chunk)
-        self.assertTrue(equal_data_chunks(expected_data_chunk,
-                                          actual_data_chunk))
+        self.assertTrue(expected_data_chunk == actual_data_chunk)
 
 
 if __name__ == '__main__':
