@@ -1,12 +1,13 @@
 from mldp.utils.constants import TERMINATION_TOKEN
-from mldp.steps.readers.base_reader import BaseReader
+from mldp.steps.readers import BaseReader
 from mldp.steps.readers.common import TextFileReaderMod, \
-    create_openers_of_valid_files
+    create_openers_of_valid_files, populate_queue_with_chunks
 from mldp.utils.util_funcs.validation import validate_data_paths
 from functools import partial as fun_partial
 from mldp.utils.util_funcs.general import listify
 from multiprocessing.dummy import Pool
 from Queue import Queue
+from copy import copy
 
 
 class CsvReader(BaseReader):
@@ -28,7 +29,7 @@ class CsvReader(BaseReader):
     """
 
     def __init__(self, chunk_size=1000, worker_threads_num=1, buffer_size=5,
-                 name_prefix=None, engine='python', **parser_kwargs):
+                 name_prefix=None, engine='c', **parser_kwargs):
         """
         :param chunk_size: the intermediate number of data units that are
                            passed along the pipeline. Larger data-chunks consume
@@ -45,8 +46,8 @@ class CsvReader(BaseReader):
                             if the queue is full. They resume when the queue
                             gets free slots.
         :param engine: whether to use 'c' or 'python' modified pandas csv reader.
-        :param parser_kwargs: additional parameters that should be passed to the pandas
-                       reader (see pandas.read_csv).
+        :param parser_kwargs: additional parameters that should be passed to the
+                             pandas reader (see pandas.read_csv).
         """
         super(CsvReader, self).__init__(chunk_size=chunk_size,
                                         name_prefix=name_prefix)
@@ -107,19 +108,24 @@ class CsvReader(BaseReader):
         # the queue will accumulate raw data-chunks produced by threads
         chunk_queue = Queue(maxsize=self.buffer_size)
         # function's partial that only will expect a file opener used by workers
-        func = fun_partial(self.get_data_chunk_iter, chunksize=self.chunk_size,
-                           **self.parser_kwargs)
+        parser_kwargs = self.adjust_kwargs_to_engine(self.parser_kwargs)
+        iter_creator = fun_partial(self.get_data_chunk_iter,
+                                   chunksize=self.chunk_size, **parser_kwargs)
+
+        queue_populator = fun_partial(populate_queue_with_chunks,
+                                      itr_creator=iter_creator,
+                                      queue=chunk_queue)
 
         # creating a pool of threads, and assigning jobs to them
         pool = Pool(self.worker_threads_num)
-        pool.map_async(func, file_openers)
+        pool.map_async(queue_populator, file_openers)
         pool.close()  # indicate that never going to submit more work
 
         # the inf. while loop is broken when all files are read,
         # i.e. a termination token is received for each file
         received_termin_tokens_count = 0
         while True:
-            chunk = chunk_queue.get(timeout=5)
+            chunk = chunk_queue.get(timeout=35)
             if isinstance(chunk, Exception):
                 raise chunk
             if chunk == TERMINATION_TOKEN:
@@ -132,10 +138,11 @@ class CsvReader(BaseReader):
 
     def _create_single_th_iter(self, file_openers):
         """Single threaded generator that avoid using Pools and Queues."""
+        parser_kwargs = self.adjust_kwargs_to_engine(self.parser_kwargs)
         for file_opener in file_openers:
             dc_iter = self.get_data_chunk_iter(file_opener,
                                                chunksize=self.chunk_size,
-                                               **self.parser_kwargs)
+                                               **parser_kwargs)
             for chunk in dc_iter:
                 yield chunk
 
@@ -147,9 +154,23 @@ class CsvReader(BaseReader):
         """
         f = file_opener()
         try:
-            pandas_iter = TextFileReaderMod(f,
-                                            iterable=True,
-                                            **parser_kwargs)
+            pandas_iter = TextFileReaderMod(f, iterable=True, **parser_kwargs)
         except Exception as e:
             raise e
         return pandas_iter
+
+    @staticmethod
+    def adjust_kwargs_to_engine(kwargs):
+        """
+        Makes sure that passed kwargs match the engine. As c engine requires
+        a different argument for separators.
+        """
+        new_kwargs = copy(kwargs)  # to avoid alteration by reference
+        if new_kwargs['engine'] == 'c':
+            if 'delimiter' not in new_kwargs:
+                if 'sep' in kwargs:
+                    new_kwargs['delimiter'] = new_kwargs['sep']
+                    del new_kwargs['sep']
+                else:
+                    new_kwargs['delimiter'] = ','
+        return new_kwargs

@@ -5,8 +5,9 @@ from mldp.utils.util_funcs.validation import equal_vals
 
 class DataChunk(object):
     """
-    TODO: terminology.
-    TODO: explain the idea about the same first dimension.
+    A collection of data(units) that are passed along the data pipeline.
+    Essentially, it's a dictionary of numpy arrays where the first dimension is
+    the same (i.e. same length).
     """
 
     def __init__(self, dct=None, preserve_order=True):

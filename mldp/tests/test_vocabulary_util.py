@@ -2,7 +2,7 @@ import unittest
 from mldp.utils.util_classes import Vocabulary
 from mldp.steps.readers import CsvReader
 from mldp.utils.util_funcs.paths_and_files import get_file_paths
-from common import read_from_csv_file
+from common import read_data_from_csv_file
 import numpy as np
 import os
 
@@ -18,7 +18,7 @@ class TestVocabularyUtil(unittest.TestCase):
         vocab = Vocabulary(self.reader)
         vocab.create(data_source, "first_name")
 
-        data = read_from_csv_file(get_file_paths(data_path))
+        data = read_data_from_csv_file(get_file_paths(data_path))
         unique_first_names = np.unique(data['first_name'])
 
         for ufn in unique_first_names:

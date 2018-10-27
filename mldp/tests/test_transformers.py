@@ -6,7 +6,7 @@ from mldp.steps.readers import CsvReader
 from mldp.utils.util_funcs.data_chunks import equal_data_chunks
 from mldp.utils.util_classes import Vocabulary
 from common import generate_data_chunk, create_list_of_data_chunks,\
-    read_from_csv_file
+    read_data_from_csv_file
 from mock import patch
 import copy
 from numpy import isclose
@@ -114,7 +114,7 @@ class TestTransformers(unittest.TestCase):
             vocab.create(data_source={"data_path": data_path},
                          data_field_names=target_field)
 
-            data = read_from_csv_file(data_path)
+            data = read_data_from_csv_file(data_path)
             data_original = copy.deepcopy(data)
 
             mapper_to = VocabMapper({target_field: vocab}, "id")
@@ -204,7 +204,7 @@ class TestTransformers(unittest.TestCase):
         symbols_to_mask = ["The", "a", "to", "as"]
         axis = 1
 
-        data_chunk = read_from_csv_file(data_path, sep="\t")
+        data_chunk = read_data_from_csv_file(data_path, sep="\t")
 
         # tokenize field values
         for fn in field_names:

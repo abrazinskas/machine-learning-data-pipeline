@@ -24,12 +24,17 @@ def generate_data_chunk(data_attrs_number, data_size):
     return data_chunk
 
 
-def read_from_csv_file(file_path, **kwargs):
+def read_data_from_csv_file(file_path, **kwargs):
     if isinstance(file_path, list):
         data = pandas.concat([pandas.read_csv(p, **kwargs) for p in file_path])
     else:
         data = pandas.read_csv(file_path, **kwargs)
     r = data.to_dict('list')
-    for k in r.keys():
-        r[k] = np.array(r[k])
-    return r
+
+    for k, v in r.items():
+        v = np.array(v)
+        if v.dtype not in [int, float]:
+            v = v.astype(object)
+        r[k] = v
+
+    return DataChunk(r)

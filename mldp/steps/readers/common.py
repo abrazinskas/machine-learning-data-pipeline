@@ -1,10 +1,9 @@
 from pandas.io.parsers import TextFileReader
 from mldp.utils.constants import TERMINATION_TOKEN
-from mldp.utils.util_classes import fs_accessor_factory
+from mldp.utils.util_classes import fs_accessor_factory, DataChunk
 from mldp.utils.util_funcs.paths_and_files import is_s3_path,\
     filter_file_paths_by_extension
 from functools import partial as fun_partial
-from collections import OrderedDict
 
 
 class TextFileReaderMod(TextFileReader):
@@ -13,16 +12,17 @@ class TextFileReaderMod(TextFileReader):
     read data into Pandas DataFrames but instead leaves data in the dictionary
     of the numpy arrays format.
     """
-    def __init__(self, f, engine=None, od=False, **kwargs):
+    def __init__(self, f, preserve_attr_order=False, **kwargs):
         """
-        :param od: whether to return ordered dictionaries for data-chunks.
+        :param preserve_attr_order: whether to return ordered fields in
+                                    data-chunks.
         """
-        super(TextFileReaderMod, self).__init__(f, engine, **kwargs)
-        self.od = od
+        super(TextFileReaderMod, self).__init__(f, **kwargs)
+        self.preserve_attr_order = preserve_attr_order
 
     def read(self, nrows=None):
         """
-        :return: ordered dict of numpy arrays.
+        :return: data-chunk.
         """
         if nrows is not None:
             if self.options.get('skipfooter'):
@@ -30,26 +30,25 @@ class TextFileReaderMod(TextFileReader):
         fields_and_fields_to_data_tuple = self._engine.read(nrows)
         index, columns, col_dict = fields_and_fields_to_data_tuple
 
-        if self.od:
-            data_chunk = OrderedDict()
-            for cn in columns:
-                data_chunk[cn] = col_dict[cn]
-            return data_chunk
-        else:
-            return col_dict
+        if not self.preserve_attr_order:
+            return DataChunk(col_dict, preserve_order=False)
+
+        dc = DataChunk(preserve_order=self.preserve_attr_order)
+        for cn in columns:
+            dc[cn] = col_dict[cn]
+        return dc
 
 
-def populate_queue_with_chunks(itr_creator, queue):
+def populate_queue_with_chunks(f, itr_creator, queue):
     """
     This function is used by thread workers in order to load and store data
     chunks to the common chunk queue.
 
     :param itr_creator: a function that creates an iterable over data-chunks.
     :param queue: self-explanatory.
-    :return: None.
     """
     try:
-        it = itr_creator()
+        it = itr_creator(f)
         for data_chunk in it:
             queue.put(data_chunk)
     except Exception as e:
