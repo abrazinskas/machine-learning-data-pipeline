@@ -1,3 +1,4 @@
 from vocabulary import Vocabulary
-from mldp.utils.util_classes.fs_accessor_factory import fs_accessor_factory
+from fs_accessor_factory import fs_accessor_factory
 from ordered_attrs import OrderedAttrs
+from data_chunk import DataChunk

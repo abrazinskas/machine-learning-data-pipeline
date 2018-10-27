@@ -1,38 +1,6 @@
-from mldp.utils.util_funcs.general import all_elements_are_equal
-from general import listify
+from numpy import isclose
 import numpy as np
 from collections import OrderedDict
-
-
-def validate_data_chunk(data_chunk, error_mess_prefix=""):
-    """Checks if data-chunk is a dictionary of the same size numpy arrays."""
-    if error_mess_prefix != "":
-        error_mess_prefix = error_mess_prefix[0].upper() + error_mess_prefix[1:]
-
-    if not isinstance(data_chunk, dict):
-        error_mess = "data-chunk must be '%s', while it's '%s'." % \
-                     (dict.__name__, type(data_chunk).__name__)
-        if error_mess_prefix != "":
-            error_mess = error_mess_prefix + " " + error_mess
-        else:
-            error_mess = error_mess[0].upper() + error_mess[1:]
-        raise TypeError(error_mess)
-    lens = []
-    for k, v in data_chunk.items():
-        curr_len = len(v)
-        if not isinstance(v, np.ndarray):
-            error_mess = "data-chunk field values must be numpy arrays, while" \
-                         " '%s' field contains: '%s'." %\
-                         (k, type(v).__name__)
-            if error_mess_prefix != "":
-                error_mess = error_mess_prefix + " " + error_mess
-            else:
-                error_mess = error_mess[0].upper() + error_mess[1:]
-            raise TypeError(error_mess)
-        lens.append(curr_len)
-
-    if not all_elements_are_equal(lens):
-        raise ValueError("All data-chunk arrays must be of the same size.")
 
 
 def validate_field_names(field_names):
@@ -79,3 +47,20 @@ def equal_to_constant(var, constant):
     if type(var) != type(constant):
         return False
     return var == constant
+
+
+def equal_vals(val1, val2):
+    """Recursively checks equality of two values."""
+    if type(val1) != type(val2):
+        return False
+    if isinstance(val1, (list, tuple, np.ndarray)):
+        if len(val1) != len(val2):
+            return False
+        for indx in range(len(val1)):
+            if not equal_vals(val1[indx], val2[indx]):
+                return False
+        return True
+    elif isinstance(val1, float):
+        return isclose(val1, val2)
+    else:
+        return val1 == val2

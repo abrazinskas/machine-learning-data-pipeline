@@ -1,5 +1,4 @@
-from mldp.utils.util_funcs.validation import validate_data_chunk
-from mldp.steps.base_step import BaseStep
+from mldp.steps import BaseStep
 
 
 class BaseReader(BaseStep):
@@ -28,10 +27,10 @@ class BaseReader(BaseStep):
         :return: generator over data-chunks.
         """
         for data_chunk in self._iter(**kwargs):
-            try:
-                validate_data_chunk(data_chunk)
-            except Exception as e:
-                raise e
+            # try:
+            #     validate_data_chunk(data_chunk)
+            # except Exception as e:
+            #     raise e
             yield data_chunk
 
     def _iter(self, **kwargs):

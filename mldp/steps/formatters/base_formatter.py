@@ -1,4 +1,3 @@
-from mldp.utils.util_funcs.validation import validate_data_chunk
 from mldp.steps.base_step import BaseStep
 
 
@@ -16,10 +15,11 @@ class BaseFormatter(BaseStep):
         :return: depends on the children class's _format(), without any
                  format restrictions.
         """
-        try:
-            validate_data_chunk(data_chunk, error_mess_prefix="input")
-        except StandardError as e:
-            raise e
+        # try:
+        #     validate_data_chunk(data_chunk, error_mess_prefix="input")
+        # except StandardError as e:
+        #     raise e
+        #
         return self._format(data_chunk)
 
     def _format(self, data_chunk):

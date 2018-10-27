@@ -1,6 +1,4 @@
-from mldp.utils.util_funcs.validation import validate_data_chunk
 from mldp.steps.base_step import BaseStep
-from mldp.utils.util_funcs.data_chunks import get_chunk_len
 import numpy as np
 
 
@@ -31,7 +29,11 @@ class ChunkSizeAdjuster(BaseStep):
         with the adjusted size.
         """
         for data_chunk in data_chunk_iter:
-            validate_data_chunk(data_chunk, error_mess_prefix="input")
+            # try:
+            #     validate_data_chunk(data_chunk, error_mess_prefix="input")
+            # except Exception as e:
+            #     raise e
+
             for adjusted_dc in self._collector.absorb_yield_if_full(data_chunk):
                 yield adjusted_dc
 
