@@ -27,8 +27,7 @@ class TestDataPipelineIntegration(unittest.TestCase):
 
         for wpn in worker_processes_nums:
 
-            dev_data_pipeline = Pipeline(reader,
-                                         worker_processes_num=wpn)
+            dev_data_pipeline = Pipeline(reader, worker_processes_num=wpn)
             dev_data_pipeline.add_step(FieldsSelector(field_names))
             dev_data_pipeline.add_step(ChunkSizeAdjuster(new_size=10))
             dev_data_pipeline.add_step(PandasFormatter())

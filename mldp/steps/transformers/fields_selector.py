@@ -5,8 +5,7 @@ from mldp.utils.util_funcs.general import listify
 
 class FieldsSelector(BaseTransformer):
     """
-    Selects features/fields specified in attr_names from data-chunks and
-    drops the rest.
+    Preserves a subset of fields from data-chunk, drops the rest in-place.
     """
 
     def __init__(self, field_names, **kwargs):
@@ -24,4 +23,8 @@ class FieldsSelector(BaseTransformer):
         self.field_names = listify(field_names)
 
     def _transform(self, data_chunk):
-        return {name: data_chunk[name] for name in self.field_names}
+        fn_set = set(self.field_names)
+        for fn in data_chunk:
+            if fn not in fn_set:
+                del data_chunk[fn]
+        return data_chunk

@@ -70,7 +70,7 @@ class DataChunk(object):
             return len(self[self.keys()[0]])
         return 0
 
-    def __iter__(self):
+    def iter(self):
         """Creates a generator over data-units (dict or ordered dict)."""
         if not self.is_valid():
             raise ValueError("Can't iterate over an invalid data-chunk.")
@@ -80,6 +80,9 @@ class DataChunk(object):
             for k in self.keys():
                 data_unit[k] = self[k][i]
             yield data_unit
+
+    def __iter__(self):
+        return iter(self.keys())
 
     def __getitem__(self, key):
         return self.data[key]
