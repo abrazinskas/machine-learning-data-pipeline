@@ -4,7 +4,7 @@ import pandas
 
 class PandasFormatter(BaseFormatter):
     """
-    Converts data-chunks to pandas data-frames.
+    Converts chunk-chunks to pandas chunk-frames.
     """
 
     def _format(self, data_chunk):
@@ -12,4 +12,4 @@ class PandasFormatter(BaseFormatter):
         :param data_chunk: dict of np.ndarrays
         :return: Pandas DataFrame.
         """
-        return pandas.DataFrame(data_chunk)
+        return pandas.DataFrame(data_chunk.data)

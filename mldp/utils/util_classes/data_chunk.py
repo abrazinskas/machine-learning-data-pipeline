@@ -17,7 +17,7 @@ class DataChunk(object):
         :param preserve_order: whether to remember the order of inserted fields
                                by using ordered dicts.
         """
-        self._data = OrderedDict() if preserve_order else {}
+        self.data = OrderedDict() if preserve_order else {}
         if dct:
             allowed_types = (dict, OrderedDict)
             if not isinstance(dct, allowed_types):
@@ -31,13 +31,13 @@ class DataChunk(object):
                                  " length (1st dim).")
 
     def items(self):
-        return self._data.items()
+        return self.data.items()
 
     def keys(self):
-        return self._data.keys()
+        return self.data.keys()
 
     def values(self):
-        return self._data.values()
+        return self.data.values()
 
     def append(self, data_unit):
         allowed_types = (dict, OrderedDict)
@@ -75,23 +75,23 @@ class DataChunk(object):
         if not self.is_valid():
             raise ValueError("Can't iterate over an invalid data-chunk.")
         for i in range(len(self)):
-            data_unit = OrderedDict() if isinstance(self._data, OrderedDict) \
+            data_unit = OrderedDict() if isinstance(self.data, OrderedDict) \
                 else {}
             for k in self.keys():
                 data_unit[k] = self[k][i]
             yield data_unit
 
     def __getitem__(self, key):
-        return self._data[key]
+        return self.data[key]
 
     def __contains__(self, key):
-        return key in self._data
+        return key in self.data
 
     def __delitem__(self, key):
-        del self._data[key]
+        del self.data[key]
 
     def __setitem__(self, key, value):
-        self._data[key] = value
+        self.data[key] = value
 
     def is_valid(self):
         try:

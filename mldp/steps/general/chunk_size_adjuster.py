@@ -1,4 +1,6 @@
-from mldp.steps.base_step import BaseStep
+from mldp.steps import BaseStep
+from mldp.utils.util_classes import DataChunk
+from collections import OrderedDict
 import numpy as np
 
 
@@ -39,23 +41,27 @@ class ChunkSizeAdjuster(BaseStep):
 
         # yield the last incomplete chunk
         if len(self._collector):
-            yield self._collector.data
+            yield self._collector.chunk
 
 
 class _ChunkCollector(object):
     """
-    Absorbs data-chunks until it gets full, then yields a size adjusted
-    data-chunk. Automatically resets itself after yielding.
+    Absorbs chunk-chunks until it gets full, then yields a size adjusted
+    chunk-chunk. Automatically resets itself after yielding.
     """
 
     def __init__(self, max_size):
         self.max_size = max_size
-        self._chunk_collector = {}  # key: list of chunks pairs
+        # key: field_names, values: chunk field values in a list
+        self._chunk_data_collector = OrderedDict()
 
     @property
-    def data(self):
-        """Returns a dictionary of concatenated numpy arrays."""
-        return {k: np.concatenate(v) for k, v in self._chunk_collector.items()}
+    def chunk(self):
+        """Returns a chunk-chunk."""
+        dc = DataChunk()
+        for k, v in self._chunk_data_collector.items():
+            dc[k] = np.concatenate(v)
+        return dc
 
     def full(self):
         """Detects if the collector is full."""
@@ -63,31 +69,31 @@ class _ChunkCollector(object):
 
     def append(self, k, v):
         self._validate_input_value(v)
-        if k not in self._chunk_collector:
-            self._chunk_collector[k] = []
-        self._chunk_collector[k].append(v)
+        if k not in self._chunk_data_collector:
+            self._chunk_data_collector[k] = []
+        self._chunk_data_collector[k].append(v)
 
     def __getitem__(self, key):
-        return self._chunk_collector[key]
+        return self._chunk_data_collector[key]
 
     def __setitem__(self, key, value):
         self._validate_input_value(value)
         self._validate_input_length(value)
-        self._chunk_collector[key] = value
+        self._chunk_data_collector[key] = value
 
     def __len__(self):
-        keys = self._chunk_collector.keys()
+        keys = self._chunk_data_collector.keys()
         if len(keys) == 0:
             return 0
-        return sum([len(el) for el in self._chunk_collector[keys[0]]])
+        return sum([len(el) for el in self._chunk_data_collector[keys[0]]])
 
     def absorb_yield_if_full(self, data_chunk):
         """
-        Adds the data-chunk to the collector, yields a new data_chunk if the
+        Adds the chunk-chunk to the collector, yields a new data_chunk if the
         collector is full.
         """
         start_indx = 0
-        end_indx = get_chunk_len(data_chunk)
+        end_indx = len(data_chunk)
 
         while start_indx < end_indx:
             size_before = len(self)
@@ -99,11 +105,11 @@ class _ChunkCollector(object):
 
             # if it's full yield and reset
             if self.full():
-                yield self.data
-                self._chunk_collector = {}
+                yield self.chunk
+                self._chunk_data_collector = {}
 
     def collect_missing_units(self, data_chunk, start_indx, end_indx):
-        """Stores units from the data-chunk to the collector."""
+        """Stores units from the chunk-chunk to the collector."""
         slice_indx = range(start_indx, end_indx)
         for k in data_chunk:
             self.append(k, data_chunk[k][slice_indx])
@@ -112,13 +118,11 @@ class _ChunkCollector(object):
         if len(self) and len(value) != len(self):
             raise ValueError(
                 "The size of the input value must be %d,"
-                " got %d instead." % (len(self), len(value))
-            )
+                " got %d instead." % (len(self), len(value)))
 
     @staticmethod
     def _validate_input_value(value):
         if not isinstance(value, np.ndarray):
             raise TypeError(
                 "The input value must be np.ndarray, got %s instead." %
-                type(value).name
-            )
+                type(value).name)

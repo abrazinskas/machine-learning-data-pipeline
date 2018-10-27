@@ -1,7 +1,6 @@
 import unittest
 from common import generate_data_chunk, create_list_of_data_chunks
 from mldp.steps.general import ChunkSizeAdjuster
-from mldp.utils.util_funcs.data_chunks import equal_data_chunks
 import itertools
 
 
@@ -22,9 +21,9 @@ class ChunkSizeAdjusterTests(unittest.TestCase):
             batcher = ChunkSizeAdjuster(batch_size)
 
             indx = 0
-            for batch in batcher.iter(inp_data_chunks):
+            for actual_chunk in batcher.iter(inp_data_chunks):
                 expected_batch = expected_batches[indx]
-                self.assertTrue(equal_data_chunks(batch, expected_batch))
+                self.assertTrue(actual_chunk == expected_batch)
                 indx += 1
             self.assertEqual(len(expected_batches), indx)
 
