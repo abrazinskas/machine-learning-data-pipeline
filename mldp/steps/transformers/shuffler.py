@@ -21,8 +21,8 @@ class Shuffler(BaseTransformer):
 
     def _transform(self, data_chunk):
         """
-        :param data_chunk: dict of np.ndarrays
-        :return: data-chunk with shuffled values
+        :param data_chunk: self.explanatory.
+        :return: data-chunk with shuffled field values.
         """
         shuffled_order = permutation(range(len(data_chunk)))
         for key in data_chunk.keys():

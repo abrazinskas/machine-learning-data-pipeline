@@ -38,9 +38,9 @@ class Pipeline(OrderedAttrs):
     and finally produce pandas data-frames via the formatter (3.).
 
     The pipeline has an intermediate format of data-chunks that are passed along
-    , which is a dictionary of numpy arrays. The restriction allows to re-use
-    pre-implemented steps. However, the user can use a formatter to convert
-    data-chunks to a desired format in the end of the pipeline
+    , which is essentially a dictionary of numpy arrays. The restriction allows
+     to re-use pre-implemented steps. However, the user can use a formatter to
+    convert data-chunks to a desired format in the end of the pipeline
     (e.g. to pandas data frames). The formatter must be the last step, as it
     outputs data-chunks of arbitrary format.
 
@@ -156,12 +156,12 @@ class Pipeline(OrderedAttrs):
                                 class_name="Pipeline")
     def iter(self, **kwargs):
         """
-        Creates a generator over processed data-chunks that a user can access.
+        Creates a generator of processed data-chunks that a user can access.
         The way data-chunks are generated/processed depends on the
         workers_processes_number, see the class's docstring.
 
         :param kwargs: params to be passed to pre_processor(opt) or reader.
-        :return: generator over processed data-chunks.
+        :return: generator of processed data-chunks.
         """
         if self.preprocessor is not None:
             logger.info("Running the preprocessor")
@@ -173,7 +173,7 @@ class Pipeline(OrderedAttrs):
 
     def _create_processed_data_chunks_gen(self, reader_gen):
         """
-        :return: generator over processed data-chunks.
+        :return: generator of processed data-chunks.
         """
         if self.worker_processes_number == 0:
             itr = self._create_single_process_gen(reader_gen)
@@ -186,7 +186,7 @@ class Pipeline(OrderedAttrs):
         Chains reader and steps together, such that the data processing would be
         performed on the main process.
 
-        :return: generator over processed data-chunks.
+        :return: generator of processed data-chunks.
         """
         return combine_steps_into_chain(data_producer=data_producer,
                                         processing_steps=self.steps)

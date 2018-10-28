@@ -11,7 +11,7 @@ class BaseFormatter(BaseStep):
 
     def __call__(self, data_chunk):
         """
-        :param data_chunk: dict of np.ndarrays.
+        :param data_chunk: self-explanatory.
         :return: depends on the children class's _format(), without any
                  format restrictions.
         """
@@ -24,7 +24,7 @@ class BaseFormatter(BaseStep):
 
     def _format(self, data_chunk):
         """
-        :param data_chunk: dict of np.ndarrays.
+        :param data_chunk: self-explanatory.
         :return: data_chunk in a desired format (e.g. pandas data-frame).
         """
         raise NotImplementedError

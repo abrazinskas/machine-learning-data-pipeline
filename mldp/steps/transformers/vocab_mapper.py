@@ -29,7 +29,6 @@ class VocabMapper(BaseTransformer):
         try:
             validate_field_names_mapping(field_names_to_vocabs, Vocabulary)
         except StandardError as e:
-            validate_field_names_mapping(field_names_to_vocabs, Vocabulary)
             raise e
 
         super(VocabMapper, self).__init__(**kwargs)

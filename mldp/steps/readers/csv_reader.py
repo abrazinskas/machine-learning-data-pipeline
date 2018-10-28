@@ -74,9 +74,7 @@ class CsvReader(BaseReader):
                           Will work for local data storage or S3.
                           In the case of s3, it should have the s3://path
                           format.
-        :return: iterator (generator) over data-chunks, which are dictionaries
-                 of numpy arrays. Namely, each column gets a key and values are
-                 stored into numpy arrays.
+        :return: generator of data-chunks.
         """
         try:
             validate_data_paths(data_path)
@@ -99,7 +97,7 @@ class CsvReader(BaseReader):
 
     def _create_multi_th_gen(self, file_openers):
         """
-        Creates a multi-threaded generator over data-chunks by reading data from
+        Creates a multi-threaded generator of data-chunks by reading data from
         data_paths. Works by spawning thread workers and assigning csv files to
         them. Threads populate a queue with raw data-chunks.
 
@@ -149,7 +147,7 @@ class CsvReader(BaseReader):
     def get_data_chunk_iter(file_opener, **parser_kwargs):
         """
         Create and return a modified pandas data generator that spits out
-        dictionaries of numpy arrays, instead of data-frames.
+        data-chunks instead of data-frames.
         """
         f = file_opener()
         try:

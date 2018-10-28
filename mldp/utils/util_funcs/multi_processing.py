@@ -4,7 +4,7 @@ import multiprocessing.queues
 
 def create_iter_from_queue(queue, term_token):
     """
-    Creates a iterable generator over a multiprocessing queue, which is
+    Creates a iterable generator of a multiprocessing queue, which is
     stopped when the "poison pill" is found in the queue.
     :param queue: multiprocessing Queue object
     :param term_token: poison pill indicating that it should not be expected

@@ -15,10 +15,6 @@ class BaseTransformer(BaseStep):
     """
 
     def __call__(self, data_chunk):
-        """
-        :type data_chunk: dict of np.ndarrays.
-        :rtype data_chunk: dict of np.ndarrays.
-        """
         try:
             data_chunk.validate()
         except StandardError as e:
@@ -35,7 +31,7 @@ class BaseTransformer(BaseStep):
 
     def _transform(self, data_chunk):
         """
-        :type data_chunk: dict of np.ndarrays.
-        :return: transformed data-chunk (same format) with modified values.
+        :param data_chunk: self-explanatory.
+        :return: transformed data-chunk with modified field values.
         """
         raise NotImplementedError

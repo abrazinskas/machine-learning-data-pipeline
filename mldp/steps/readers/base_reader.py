@@ -17,14 +17,14 @@ class BaseReader(BaseStep):
 
     def iter(self, **kwargs):
         """
-        Creates an iterable generator over data chunks which are created by
+        Creates an iterable generator of data chunks which are created by
         reading data specified by **kwargs.
 
         :param kwargs: must be coherent with _iter method that is implemented in
                        subclasses. E.g. it might data_path, along with
                        units_per_file that control the units that are read from
                        each file.
-        :return: generator over data-chunks.
+        :return: generator of data-chunks.
         """
         for data_chunk in self._iter(**kwargs):
             try:
@@ -38,6 +38,6 @@ class BaseReader(BaseStep):
         One has to implement the actual logic for data reading in subclass
         readers.
 
-        :return: generator over data-chunks.
+        :return: generator of data-chunks.
         """
         raise NotImplementedError

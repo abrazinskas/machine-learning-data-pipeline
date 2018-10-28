@@ -28,7 +28,7 @@ class FunctionApplier(BaseTransformer):
 
     def _transform(self, data_chunk):
         """
-        :param data_chunk: dict of np.ndarrays.
+        :param data_chunk: self-explanatory.
         :return data_chunk: same as input but with modified values.
         """
         for field_name, func in self.field_name_to_func.items():

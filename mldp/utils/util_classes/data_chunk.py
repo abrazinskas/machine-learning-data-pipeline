@@ -5,9 +5,9 @@ from mldp.utils.util_funcs.validation import equal_vals
 
 class DataChunk(object):
     """
-    A collection of data(units) that are passed along the data pipeline.
+    A collection of data units that are passed along the data pipeline.
     Essentially, it's a dictionary of numpy arrays where the first dimension is
-    the same (i.e. same length).
+    the same along all arrays (i.e. same length).
     """
 
     def __init__(self, dct=None, preserve_order=True):
@@ -71,7 +71,7 @@ class DataChunk(object):
         return 0
 
     def iter(self):
-        """Creates a generator over data-units (dict or ordered dict)."""
+        """Creates a generator of data-units (dict or ordered dict)."""
         if not self.is_valid():
             raise ValueError("Can't iterate over an invalid data-chunk.")
         for i in range(len(self)):
