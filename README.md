@@ -7,7 +7,7 @@ Essentially, it provides an infrastructure for efficient parallel data processin
 
 As opposed to a common meaning of data pipeline, the module focuses on providing data-chunks in real-time, as fast as possible, assuming that a data processing procedure might change over the course of experiments series.
 
-Because similar computational steps can in principle be applied to different ML projects, the main problem is that it's not straightforward to apply them to data in different format.
+Because similar computational steps can in principle be applied to different ML projects, the main problem is that it's not straightforward to apply them to data in a different format.
 Fortunately, the pipeline passes a light-weight intermediate data format across steps. Therefore, **computational steps can be reused** as their input will always be of the same format regardless of whether your data is in csv, xml, or some other format.
 
 Finally, a need for experiments reproducibility is considered by **documentation generation**. Such that it would be possible to rerun an older experiment and obtain the same results, or simply lookup what setup has been used in a previous model run. To facilitate that, the module allows documentation generation of pipeline setups and individual components that were used to process data.
@@ -91,10 +91,10 @@ For a more detailed presentation of the module's features and applications, plea
 
 ### Intermediate format ###
 
-The MLDP restricts the format of data-chunks that travel along the pipeline to be **dictionaries of numpy arrays** of arbitrary types and shapes, with the following rational:
+The MLDP restricts the format of data-chunks that travel along the pipeline to be specific objects. Essentially, they contain **dictionaries of numpy arrays** of arbitrary dtypes and shapes, except the first dimension corresponding to the values chunk size. The rationale of the format is the following:
 
-1. Potential to apply fast vectorized operations on numpy arrays.
-2. Code re-usability of steps. Namely, if a step is implemented once, it can be re-used in different projects regardless of input data format (under mild assumptions).
+1. Code re-usability of steps. Namely, if a step is implemented once, it can be re-used in different projects regardless of input data format (under mild assumptions).
+2. Potential to apply fast vectorized operations on numpy arrays.
 
 Data-chunks have **field_names** (dict keys) corresponding to data attributes (e.g. "text_ids", "texts", "labels"). And **field_values** (dict values) corresponding to data-unit values, for example the actual *text ids* or *text* strings. While *field_values* are restricted to be numpy arrays, their actual elements can be of arbitrary types, and thus any data can be frames easily into the format.
 
