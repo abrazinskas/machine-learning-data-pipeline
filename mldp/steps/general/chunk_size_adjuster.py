@@ -46,8 +46,8 @@ class ChunkSizeAdjuster(BaseStep):
 
 class _ChunkCollector(object):
     """
-    Absorbs chunk-chunks until it gets full, then yields a size adjusted
-    chunk-chunk. Automatically resets itself after yielding.
+    Absorbs data-chunks until it gets full, then yields a size adjusted
+    data-chunk. Automatically resets itself after yielding.
     """
 
     def __init__(self, max_size):
@@ -57,7 +57,7 @@ class _ChunkCollector(object):
 
     @property
     def chunk(self):
-        """Returns a chunk-chunk."""
+        """Returns a data-chunk."""
         dc = DataChunk()
         for k, v in self._chunk_data_collector.items():
             dc[k] = np.concatenate(v)
@@ -76,10 +76,10 @@ class _ChunkCollector(object):
     def __getitem__(self, key):
         return self._chunk_data_collector[key]
 
-    def __setitem__(self, key, value):
-        self._validate_input_value(value)
-        self._validate_input_length(value)
-        self._chunk_data_collector[key] = value
+    # def __setitem__(self, key, value):
+    #     self._validate_input_value(value)
+    #     self._validate_input_length(value)
+    #     self._chunk_data_collector[key] = value
 
     def __len__(self):
         keys = self._chunk_data_collector.keys()
@@ -89,7 +89,7 @@ class _ChunkCollector(object):
 
     def absorb_yield_if_full(self, data_chunk):
         """
-        Adds the chunk-chunk to the collector, yields a new data_chunk if the
+        Adds the data-chunk to the collector, yields a new data_chunk if the
         collector is full.
         """
         start_indx = 0
@@ -109,7 +109,7 @@ class _ChunkCollector(object):
                 self._chunk_data_collector = {}
 
     def collect_missing_units(self, data_chunk, start_indx, end_indx):
-        """Stores units from the chunk-chunk to the collector."""
+        """Stores units from the data-chunk to the collector."""
         slice_indx = range(start_indx, end_indx)
         for k in data_chunk:
             self.append(k, data_chunk[k][slice_indx])

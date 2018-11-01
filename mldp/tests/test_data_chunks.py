@@ -27,10 +27,8 @@ class TestDataChunks(unittest.TestCase):
         for attrs_number, invalid_val in product(attrs_numbers, invalid_values):
             chunk = generate_data_chunk(attrs_number, chunk_size)
             attr_to_alter = np.random.choice(chunk.keys(), 1)[0]
-            chunk[attr_to_alter] = invalid_val
-
             with self.assertRaises(TypeError):
-                chunk.validate()
+                chunk[attr_to_alter] = invalid_val
 
     def test_chunks_with_different_value_array_sizes(self):
         chunk_size = 100

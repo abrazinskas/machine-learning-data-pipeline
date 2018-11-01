@@ -48,7 +48,7 @@ class DataChunk(object):
             if not self.is_valid():
                 raise ValueError("Can't insert a new data-unit to an invalid"
                                  " data-chunk.")
-            self[k] = np.insert(self[k], len(self[k]), data_unit[k])
+            self[k] = np.append(self[k], len(self[k]), data_unit[k])
 
     def __eq__(self, other):
         if not isinstance(other, DataChunk):
@@ -69,6 +69,9 @@ class DataChunk(object):
         if len(self.keys()):
             return len(self[self.keys()[0]])
         return 0
+
+    def __str__(self):
+        return str(self.data.items())
 
     def iter(self):
         """Creates a generator of data-units (dict or ordered dict)."""
@@ -94,6 +97,8 @@ class DataChunk(object):
         del self.data[key]
 
     def __setitem__(self, key, value):
+        if not isinstance(value, np.ndarray):
+            raise TypeError("Please provide a numpy array as value.")
         self.data[key] = value
 
     def is_valid(self):

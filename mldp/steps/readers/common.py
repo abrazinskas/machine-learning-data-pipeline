@@ -12,7 +12,7 @@ class TextFileReaderMod(TextFileReader):
     read data into Pandas DataFrames but instead leaves data in the dictionary
     of the numpy arrays format.
     """
-    def __init__(self, f, preserve_attr_order=False, **kwargs):
+    def __init__(self, f, preserve_attr_order=True, **kwargs):
         """
         :param preserve_attr_order: whether to return ordered fields in
                                     data-chunks.
@@ -33,7 +33,7 @@ class TextFileReaderMod(TextFileReader):
         if not self.preserve_attr_order:
             return DataChunk(col_dict, preserve_order=False)
 
-        dc = DataChunk(preserve_order=self.preserve_attr_order)
+        dc = DataChunk(preserve_order=True)
         for cn in columns:
             dc[cn] = col_dict[cn]
         return dc

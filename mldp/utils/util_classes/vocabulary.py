@@ -1,5 +1,5 @@
 from mldp.utils.util_funcs.paths_and_files import\
-    create_file_folders_if_not_exist
+    safe_mkfdir
 from mldp.utils.util_funcs.general import sort_hash, flatten
 from mldp.utils.util_classes.ordered_attrs import OrderedAttrs
 from mldp.utils.util_funcs.formatting import format_signature, format_title
@@ -188,7 +188,7 @@ class Vocabulary(OrderedAttrs):
         Writes the vocabulary to a plain text file where each line is of the
         form: {token}{sep}{count}.
         """
-        create_file_folders_if_not_exist(file_path)
+        safe_mkfdir(file_path)
         with codecs.open(file_path, 'w', encoding=self.encoding) as f:
             for symbol in self:
                 if self.add_default_special_symbols and symbol.token in\

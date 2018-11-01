@@ -49,7 +49,7 @@ def filter_file_paths_by_extension(file_paths, ext='.csv'):
     return valid_file_paths
 
 
-def create_file_folders_if_not_exist(file_path):
+def safe_mkfdir(file_path):
     """Creates folders associated with host of the file."""
     if os.path.dirname(file_path) and not\
             os.path.exists(os.path.dirname(file_path)):
