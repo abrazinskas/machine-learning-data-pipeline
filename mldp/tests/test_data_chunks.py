@@ -29,6 +29,7 @@ class TestDataChunks(unittest.TestCase):
             attr_to_alter = np.random.choice(chunk.keys(), 1)[0]
             with self.assertRaises(TypeError):
                 chunk[attr_to_alter] = invalid_val
+                chunk.validate()
 
     def test_chunks_with_different_value_array_sizes(self):
         chunk_size = 100

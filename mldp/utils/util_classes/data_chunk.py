@@ -65,6 +65,14 @@ class DataChunk(object):
 
         return True
 
+    @property
+    def size(self):
+        return len(self)
+
+    @property
+    def field_names(self):
+        return self.keys()
+
     def __len__(self):
         if len(self.keys()):
             return len(self[self.keys()[0]])
@@ -97,8 +105,7 @@ class DataChunk(object):
         del self.data[key]
 
     def __setitem__(self, key, value):
-        if not isinstance(value, np.ndarray):
-            raise TypeError("Please provide a numpy array as value.")
+        """Setting the key with arbitrary type of value."""
         self.data[key] = value
 
     def is_valid(self):

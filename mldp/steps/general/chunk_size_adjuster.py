@@ -1,5 +1,5 @@
 from mldp.steps import BaseStep
-from chunk_collectors import StandardChunkCollector
+from mldp.utils.util_classes.chunk_collectors import StandardChunkCollector
 
 
 class ChunkSizeAdjuster(BaseStep):
@@ -16,16 +16,19 @@ class ChunkSizeAdjuster(BaseStep):
     It works both by accumulating smaller upstream data-chunks and passing
     larger data-chunks downstream, and splitting larger upstream data-chunks
     into smaller downstream data-chunks.
+
+    TODO: rewrite the docstring because it does not reflect the current status
     """
 
-    def __init__(self, new_size=2, collector_class=StandardChunkCollector,
-                 collector_kwargs=None, **kwargs):
+    def __init__(self, new_size=2, collector=None, **kwargs):
         # TODO: docstring, please
         super(ChunkSizeAdjuster, self).__init__(**kwargs)
         self.new_size = new_size
 
-        collector_kwargs = {} if collector_kwargs is None else collector_kwargs
-        self._collector = collector_class(max_size=new_size, **collector_kwargs)
+        if collector is None:
+            self._coll = StandardChunkCollector(max_size=new_size)
+        else:
+            self._coll = collector
 
     def iter(self, data_chunk_iter):
         """
@@ -38,9 +41,10 @@ class ChunkSizeAdjuster(BaseStep):
             except Exception as e:
                 raise e
 
-            for adjusted_dc in self._collector.absorb_yield_if_full(data_chunk):
+            for adjusted_dc in self._coll.absorb_and_yield_if_full(data_chunk):
                 yield adjusted_dc
 
-        # yield the last incomplete chunk
-        if len(self._collector):
-            yield self._collector.chunk
+        # yield the last (incomplete) chunk
+        if len(self._coll):
+            yield self._coll.chunk
+            self._coll.reset()

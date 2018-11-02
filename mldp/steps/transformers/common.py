@@ -1,6 +1,5 @@
 
 
-
 def create_new_field_name(field_name, prefix="", suffix=""):
     """
     Creates a new field name in the format that is used across different steps.

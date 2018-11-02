@@ -6,13 +6,14 @@ import numpy as np
 
 class StandardChunkCollector(BaseChunkCollector):
     """
-    TODO: 
+    Chunk collector that is based on the number of data-units in it.
     """
 
-    def __init__(self, max_size, **kwargs):
+    def __init__(self, max_size):
         super(StandardChunkCollector, self).__init__(max_size)
         # key: field_names, values: chunk field values in a list
-        self._chunk_data_collector = OrderedDict()
+        self._chunk_data_collector = None
+        self.reset()
 
     @property
     def chunk(self):
@@ -22,11 +23,7 @@ class StandardChunkCollector(BaseChunkCollector):
             dc[k] = np.concatenate(v)
         return dc
 
-    def full(self):
-        """Detects if the collector is full."""
-        return self.max_size == len(self)
-
-    def append(self, k, v):
+    def _append(self, k, v):
         self._validate_input_value(v)
         if k not in self._chunk_data_collector:
             self._chunk_data_collector[k] = []
@@ -41,7 +38,7 @@ class StandardChunkCollector(BaseChunkCollector):
             return 0
         return sum([len(el) for el in self._chunk_data_collector[keys[0]]])
 
-    def absorb_yield_if_full(self, data_chunk):
+    def absorb_and_yield_if_full(self, data_chunk):
         """
         Adds the data-chunk to the collector, yields a new data_chunk if the
         collector is full.
@@ -53,17 +50,20 @@ class StandardChunkCollector(BaseChunkCollector):
             size_before = len(self)
             missing_count = self.max_size - size_before
             tmp_end_indx = min(start_indx + missing_count, end_indx)
-            self.collect_missing_units(data_chunk, start_indx,
-                                       end_indx=tmp_end_indx)
+            self._collect_missing_units(data_chunk, start_indx,
+                                        end_indx=tmp_end_indx)
             start_indx += (len(self) - size_before)
 
             # if it's full yield and reset
             if self.full():
                 yield self.chunk
-                self._chunk_data_collector = {}
+                self.reset()
 
-    def collect_missing_units(self, data_chunk, start_indx, end_indx):
+    def _collect_missing_units(self, data_chunk, start_indx, end_indx):
         """Stores units from the data-chunk to the collector."""
         slice_indx = range(start_indx, end_indx)
         for k in data_chunk:
-            self.append(k, data_chunk[k][slice_indx])
+            self._append(k, data_chunk[k][slice_indx])
+
+    def reset(self):
+        self._chunk_data_collector = OrderedDict()

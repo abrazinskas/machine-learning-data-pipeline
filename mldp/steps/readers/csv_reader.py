@@ -92,7 +92,7 @@ class CsvReader(BaseReader):
         if self.worker_threads_num > 1:
             chunk_iter = self._create_multi_th_gen(file_openers)
         else:
-            chunk_iter = self._create_single_th_iter(file_openers)
+            chunk_iter = self._create_single_th_gen(file_openers)
         return chunk_iter
 
     def _create_multi_th_gen(self, file_openers):
@@ -133,7 +133,7 @@ class CsvReader(BaseReader):
             else:
                 yield chunk
 
-    def _create_single_th_iter(self, file_openers):
+    def _create_single_th_gen(self, file_openers):
         """Single threaded generator that avoid using Pools and Queues."""
         parser_kwargs = self.adjust_kwargs_to_engine(self.parser_kwargs)
         for file_opener in file_openers:
