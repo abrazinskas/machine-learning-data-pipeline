@@ -44,11 +44,14 @@ class DataChunk(object):
         rpr = repr_types(allowed_types)
         if isinstance(data_unit, allowed_types):
             raise TypeError("data_unit must be %s" % " or ".join(rpr))
+        if not self.is_valid():
+            raise ValueError("Can't insert a new data-unit to an invalid"
+                             " data-chunk.")
         for k in data_unit:
-            if not self.is_valid():
-                raise ValueError("Can't insert a new data-unit to an invalid"
-                                 " data-chunk.")
-            self[k] = np.append(self[k], len(self[k]), data_unit[k])
+            if k not in self:
+                self[k] = np.array([data_unit[k]])
+            else:
+                self[k] = np.append(self[k], data_unit[k])
 
     def __eq__(self, other):
         if not isinstance(other, DataChunk):
@@ -107,6 +110,26 @@ class DataChunk(object):
     def __setitem__(self, key, value):
         """Setting the key with arbitrary type of value."""
         self.data[key] = value
+
+    def write(self, f, sep='\t', form_funcs=None):
+        """
+        Writes the chunk to a file in the tabular format.
+        :param f: opened file where the data-chunk has to be written
+        :param sep: self-explanatory.
+        :param form_funcs: dict of field names mapping to functions that
+                                 should be used to obtain str. reprs of values.
+        """
+        self.validate()
+        form_funcs = form_funcs if form_funcs else {}
+        if f.tell() == 0:
+            f.write(sep.join(self.keys()) + "\n")
+        for indx in range(len(self)):
+            strs = []
+            for fn, fv in self.items():
+                form_func = str if fn not in form_funcs else form_funcs[fn]
+                cfv = fv[indx]
+                strs.append(form_func(cfv))
+            f.write(sep.join(strs) + "\n")
 
     def is_valid(self):
         try:
