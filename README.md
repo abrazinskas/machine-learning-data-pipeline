@@ -1,1 +1,1 @@
-The module was moved to [https://github.com/ixlan/mltoolkit](MLToolkit)
+The module was moved to [MLToolkit](https://github.com/ixlan/mltoolkit)
